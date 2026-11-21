@@ -1,0 +1,28 @@
+name: Shell CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck
+
+      - name: Shellcheck (fail on errors and warnings)
+        run: shellcheck --severity=warning nodemonitor-agent.sh install.sh uninstall.sh
+
+      - name: Syntax check
+        run: |
+          bash -n nodemonitor-agent.sh
+          bash -n install.sh
+          bash -n uninstall.sh

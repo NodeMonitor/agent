@@ -1,0 +1,35 @@
+name: Agent release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck
+
+      - name: Lint before release
+        run: shellcheck --severity=warning nodemonitor-agent.sh install.sh uninstall.sh
+
+      - name: Generate checksums
+        run: |
+          sha256sum nodemonitor-agent.sh > "checksums.txt"
+          cat checksums.txt
+
+      - name: Create release with script and checksums
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: false
+          generate_release_notes: true
+          files: |
+            nodemonitor-agent.sh
+            checksums.txt
